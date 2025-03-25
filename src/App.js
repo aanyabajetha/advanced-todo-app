@@ -1,25 +1,41 @@
-import logo from './logo.svg';
+import React from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { 
+  SignedIn, 
+  SignedOut, 
+  UserButton, 
+  SignIn 
+} from "@clerk/clerk-react";
+import TaskInput from './components/TaskInput';
+import TaskList from './components/TaskList';
 import './App.css';
 
-function App() {
+const App = () => {
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <div className="header">
+        <h1>Task Manager</h1>
+        <SignedIn>
+          <UserButton />
+        </SignedIn>
+      </div>
+      
+      <SignedIn>
+        <div className="task-container">
+          <TaskInput />
+          <TaskList />
+        </div>
+      </SignedIn>
+
+      <SignedOut>
+        <div className="auth-container">
+          <SignIn />
+        </div>
+      </SignedOut>
     </div>
   );
-}
+};
 
 export default App;
+
+

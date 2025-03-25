@@ -1,38 +1,93 @@
+/* Mobile-first approach */
 .App {
-  text-align: center;
+  width: 95%;
+  margin: 1rem auto;
+  padding: 1rem;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+.header {
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
   align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
+  margin-bottom: 1.5rem;
+}
+
+.header h1 {
+  font-size: 1.8rem;
+  color: #2c3e50;
+  margin: 0;
+}
+
+.auth-container {
+  max-width: 400px;
+  margin: 2rem auto;
+  padding: 1rem;
+}
+
+/* Tablet styles */
+@media (min-width: 768px) {
+  .App {
+    width: 90%;
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2rem;
+  }
+
+  .header h1 {
+    font-size: 2.5rem;
+  }
+}
+
+/* Desktop styles */
+@media (min-width: 1024px) {
+  .App {
+    width: 80%;
+  }
+}
+
+.auth-button {
+  background: #3498db;
   color: white;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.3s ease;
 }
 
-.App-link {
-  color: #61dafb;
+.auth-button:hover {
+  background: #2980b9;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.auth-button.logout {
+  background: #e74c3c;
 }
+
+.auth-button.logout:hover {
+  background: #c0392b;
+}
+
+.task-container {
+  margin-top: 2rem;
+}
+
+.weather-widget {
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+  text-align: center;
+  color: #2c3e50;
+}
+
+.weather-widget i {
+  font-size: 1.5rem;
+  margin-right: 0.5rem;
+  color: #3498db;
+}
+
+
