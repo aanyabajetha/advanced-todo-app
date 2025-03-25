@@ -69,3 +69,37 @@
   margin: 0;
   font-size: 1.1rem;
 }
+
+.task-details {
+  display: flex;
+  gap: 1rem;
+  margin: 0.5rem 0;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.task-weather {
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background: #f8f9fa;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  color: #666;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.task-weather i {
+  color: #3498db;
+  font-size: 1.1rem;
+}
+
+.task-weather span {
+  flex: 1;
+}
+
+.task-weather small {
+  color: #999;
+  font-size: 0.8rem;
+}

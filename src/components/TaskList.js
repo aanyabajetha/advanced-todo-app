@@ -1,24 +1,17 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useUser } from '@clerk/clerk-react';
-import { deleteTask, fetchWeatherData } from '../redux/actions/taskActions';
+import { deleteTask } from '../redux/actions/taskActions';
 import './TaskList.css';
 
 const TaskList = () => {
   const tasks = useSelector(state => state.task.tasks);
-  const weather = useSelector(state => state.task.weather);
   const dispatch = useDispatch();
   const { user } = useUser();
-
-  useEffect(() => {
-    dispatch(fetchWeatherData('London')); // Replace with user's city
-  }, [dispatch]);
 
   const handleDeleteTask = (taskId) => {
     if (user) {
       dispatch(deleteTask(taskId));
-      
-      // Update localStorage
       const savedTasks = JSON.parse(localStorage.getItem(`tasks_${user.id}`) || '[]');
       const updatedTasks = savedTasks.filter(task => task.id !== taskId);
       localStorage.setItem(`tasks_${user.id}`, JSON.stringify(updatedTasks));
@@ -39,13 +32,6 @@ const TaskList = () => {
 
   return (
     <div className="task-list-container">
-      {weather && (
-        <div className="weather-widget">
-          <i className="fas fa-cloud"></i>
-          <span>{weather.main.temp}°C, {weather.weather[0].description}</span>
-        </div>
-      )}
-      
       {userTasks.length > 0 ? (
         <div className="task-list">
           {userTasks.map((task) => (
@@ -56,16 +42,32 @@ const TaskList = () => {
             >
               <div className="task-content">
                 <h3>{task.name}</h3>
-                <span className="task-priority">
-                  {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)} Priority
-                </span>
-                <span className="task-date">
-                  {new Date(task.createdAt).toLocaleDateString()}
-                </span>
+                <div className="task-details">
+                  <span className="task-priority">
+                    {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)} Priority
+                  </span>
+                  <span className="task-date">
+                    {new Date(task.createdAt).toLocaleDateString()}
+                  </span>
+                </div>
+                {task.isOutsideTask && task.weather && (
+                  <div className="task-weather">
+                    <i className="fas fa-cloud-sun"></i>
+                    <span>
+                      {task.weather.temperature !== null 
+                        ? `${task.weather.temperature}°C, ${task.weather.description} in ${task.weather.location}`
+                        : 'Weather data unavailable'}
+                    </span>
+                    <small>
+                      Weather as of {new Date(task.weather.timestamp).toLocaleTimeString()}
+                    </small>
+                  </div>
+                )}
               </div>
               <button 
                 onClick={() => handleDeleteTask(task.id)}
                 className="delete-button"
+                aria-label="Delete task"
               >
                 <i className="fas fa-trash"></i>
               </button>
@@ -83,6 +85,5 @@ const TaskList = () => {
 };
 
 export default TaskList;
-
 
 
