@@ -4,7 +4,7 @@ import {
   SignedIn, 
   SignedOut, 
   UserButton, 
-  SignIn 
+  SignIn
 } from "@clerk/clerk-react";
 import TaskInput from './components/TaskInput';
 import TaskList from './components/TaskList';
@@ -16,7 +16,9 @@ const App = () => {
       <div className="header">
         <h1>Task Manager</h1>
         <SignedIn>
-          <UserButton />
+          <div className="user-controls">
+            <UserButton afterSignOutUrl="/" />
+          </div>
         </SignedIn>
       </div>
       
@@ -29,7 +31,7 @@ const App = () => {
 
       <SignedOut>
         <div className="auth-container">
-          <SignIn />
+          <SignIn redirectUrl="/" />
         </div>
       </SignedOut>
     </div>

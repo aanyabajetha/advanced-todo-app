@@ -28,9 +28,14 @@ const TaskInput = () => {
           });
         },
         (error) => {
+          console.error('Geolocation error:', error);
           reject(error);
         },
-        { timeout: 10000 } // 10 second timeout
+        { 
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0
+        }
       );
     });
   };
@@ -52,22 +57,39 @@ const TaskInput = () => {
       if (isOutsideTask) {
         try {
           const coords = await getUserLocation();
+          console.log('Coordinates received:', coords);
+
           const weatherData = await fetchWeatherByCoords(coords.lat, coords.lon);
+          console.log('Weather data received:', weatherData);
           
-          newTask.weather = {
-            temperature: Math.round(weatherData.main.temp),
-            description: weatherData.weather[0].description,
-            icon: weatherData.weather[0].icon,
-            location: weatherData.name, // Add city name
-            timestamp: new Date().toISOString()
-          };
+          if (weatherData && weatherData.main && weatherData.weather) {
+            newTask.weather = {
+              temperature: Math.round(weatherData.main.temp),
+              description: weatherData.weather[0].description,
+              icon: weatherData.weather[0].icon,
+              location: weatherData.name,
+              timestamp: new Date().toISOString()
+            };
+          } else {
+            throw new Error('Invalid weather data format received');
+          }
         } catch (error) {
-          console.error('Failed to fetch weather data:', error);
-          setLocationError(
-            error.code === 1 
-              ? 'Please enable location access to get weather data'
-              : 'Failed to get weather data for your location'
-          );
+          console.error('Weather fetch error:', error);
+          
+          // More specific error messages
+          let errorMessage = 'Failed to get weather data';
+          if (error.message.includes('API key')) {
+            errorMessage = 'Weather service configuration error. Please contact support.';
+          } else if (error.code === 1) {
+            errorMessage = 'Please enable location access to get weather data';
+          } else if (error.message.includes('Network Error')) {
+            errorMessage = 'Network error. Please check your internet connection.';
+          } else {
+            errorMessage = `Weather service error: ${error.message}`;
+          }
+          
+          setLocationError(errorMessage);
+          
           newTask.weather = {
             temperature: null,
             description: 'Weather data unavailable',
