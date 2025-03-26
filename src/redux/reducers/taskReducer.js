@@ -1,4 +1,4 @@
-import { ADD_TASK, DELETE_TASK, SET_WEATHER, API_ERROR } from '../actions/taskActions';
+import { ADD_TASK, DELETE_TASK, SET_TASKS, SET_WEATHER, API_ERROR } from '../actions/taskActions';
 
 const initialState = {
   tasks: [],
@@ -8,7 +8,7 @@ const initialState = {
 
 const taskReducer = (state = initialState, action) => {
   switch (action.type) {
-    case 'SET_TASKS':
+    case SET_TASKS:
       return { ...state, tasks: action.payload };
     case ADD_TASK:
       return { ...state, tasks: [...state.tasks, action.payload] };

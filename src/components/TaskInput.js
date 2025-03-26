@@ -22,83 +22,19 @@ const TaskInput = () => {
       return;
     }
 
-    setLocationError('');
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        try {
-          console.log('[Geolocation Success]:', {
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
-            accuracy: position.coords.accuracy,
-            timestamp: new Date(position.timestamp).toISOString()
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          resolve({
+            lat: position.coords.latitude,
+            lon: position.coords.longitude
           });
-
-          const { latitude, longitude } = position.coords;
-          const weather = await fetchWeatherByCoords(latitude, longitude);
-          
-          console.log('[Weather API Response]:', weather);
-          
-          setWeatherData({
-            temperature: Math.round(weather.main.temp),
-            description: weather.weather[0].description,
-            location: weather.name,
-            icon: weather.weather[0].icon
-          });
-        } catch (error) {
-          const errorMessage = {
-            message: error.message,
-            code: error.response?.status,
-            data: error.response?.data
-          };
-          console.error('[Weather API Error]:', errorMessage);
-          setLocationError('Failed to fetch weather data');
-        }
-      },
-      (error) => {
-        const errorDetails = {
-          code: error.code,
-          message: error.message,
-          timestamp: new Date().toISOString()
-        };
-        console.error('[Geolocation Error]:', errorDetails);
-
-        switch (error.code) {
-          case error.PERMISSION_DENIED:
-            setLocationError('Please allow location access to get weather data');
-            console.warn('[User Permission]:', 'Location access denied by user');
-            break;
-          case error.POSITION_UNAVAILABLE:
-            setLocationError('Location information is unavailable');
-            console.error('[Position Error]:', 'Location information unavailable');
-            break;
-          case error.TIMEOUT:
-            setLocationError('Location request timed out');
-            console.error('[Timeout Error]:', 'Geolocation request timed out');
-            break;
-          default:
-            setLocationError('An unknown error occurred');
-            console.error('[Unknown Error]:', error);
-        }
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 5000,
-        maximumAge: 0
-      }
-    );
-  };
-
-  const handleOutsideTaskToggle = (checked) => {
-    console.log('[Outside Task Toggle]:', { checked });
-    setIsOutsideTask(checked);
-    if (checked) {
-      console.log('[Location Request]:', 'Initiating geolocation request');
-      getLocation();
-    } else {
-      console.log('[Weather Reset]:', 'Clearing weather data');
-      setWeatherData(null);
-      setLocationError('');
-    }
+        },
+        (error) => {
+          reject(error);
+        },
+        { timeout: 10000 } // 10 second timeout
+      );
+    });
   };
 
   const handleAddTask = async (e) => {
@@ -111,18 +47,35 @@ const TaskInput = () => {
         priority,
         createdAt: new Date().toISOString(),
         userId: user.id,
-        isOutsideTask,
-        weather: isOutsideTask ? {
-          ...weatherData,
-          timestamp: new Date().toISOString()
-        } : null
+        isOutsideTask
       };
 
-      console.log('[New Task Created]:', {
-        taskId: newTask.id,
-        hasWeather: !!newTask.weather,
-        weatherData: newTask.weather
-      });
+      if (isOutsideTask) {
+        try {
+          const coords = await getUserLocation();
+          const weatherData = await fetchWeatherByCoords(coords.lat, coords.lon);
+          
+          newTask.weather = {
+            temperature: Math.round(weatherData.main.temp),
+            description: weatherData.weather[0].description,
+            icon: weatherData.weather[0].icon,
+            location: weatherData.name, // Add city name
+            timestamp: new Date().toISOString()
+          };
+        } catch (error) {
+          console.error('Failed to fetch weather data:', error);
+          setLocationError(
+            error.code === 1 
+              ? 'Please enable location access to get weather data'
+              : 'Failed to get weather data for your location'
+          );
+          newTask.weather = {
+            temperature: null,
+            description: 'Weather data unavailable',
+            timestamp: new Date().toISOString()
+          };
+        }
+      }
 
       dispatch(addTask(newTask));
       

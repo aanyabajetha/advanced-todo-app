@@ -71,6 +71,12 @@
   background: #c0392b;
 }
 
+.user-controls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
 .task-container {
   margin-top: 2rem;
 }

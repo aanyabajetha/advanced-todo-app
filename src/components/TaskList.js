@@ -1,13 +1,22 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useUser } from '@clerk/clerk-react';
 import { deleteTask } from '../redux/actions/taskActions';
+import { setTasks } from '../redux/actions/taskActions';
 import './TaskList.css';
 
 const TaskList = () => {
   const tasks = useSelector(state => state.task.tasks);
   const dispatch = useDispatch();
   const { user } = useUser();
+
+  // Load tasks from localStorage when component mounts
+  useEffect(() => {
+    if (user) {
+      const savedTasks = JSON.parse(localStorage.getItem(`tasks_${user.id}`) || '[]');
+      dispatch(setTasks(savedTasks));
+    }
+  }, [user, dispatch]);
 
   const handleDeleteTask = (taskId) => {
     if (user) {
