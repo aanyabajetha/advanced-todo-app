@@ -1,8 +1,7 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useUser } from '@clerk/clerk-react';
-import { deleteTask } from '../redux/actions/taskActions';
-import { setTasks } from '../redux/actions/taskActions';
+import { deleteTask, setTasks } from '../redux/actions/taskActions';
 import './TaskList.css';
 
 const TaskList = () => {

@@ -14,27 +14,64 @@ const TaskInput = () => {
   const dispatch = useDispatch();
   const { user } = useUser();
 
-  const getLocation = () => {
-    if (!navigator.geolocation) {
-      const error = 'Geolocation API is not supported by this browser';
-      console.error('[Geolocation Error]:', error);
-      setLocationError(error);
-      return;
-    }
+  const getUserLocation = () => {
+    return new Promise((resolve, reject) => {
+      if (!navigator.geolocation) {
+        const error = 'Geolocation API is not supported by this browser';
+        console.error('[Geolocation Error]:', error);
+        reject(new Error(error));
+        return;
+      }
 
       navigator.geolocation.getCurrentPosition(
         (position) => {
+          console.log('[Geolocation Success]:', {
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+            accuracy: position.coords.accuracy,
+            timestamp: new Date(position.timestamp).toISOString()
+          });
           resolve({
             lat: position.coords.latitude,
             lon: position.coords.longitude
           });
         },
         (error) => {
+          const errorDetails = {
+            code: error.code,
+            message: error.message,
+            timestamp: new Date().toISOString()
+          };
+          console.error('[Geolocation Error]:', errorDetails);
           reject(error);
         },
-        { timeout: 10000 } // 10 second timeout
+        { 
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0
+        }
       );
     });
+  };
+
+  const handleOutsideTaskToggle = async (checked) => {
+    console.log('[Outside Task Toggle]:', { checked });
+    setIsOutsideTask(checked);
+    if (checked) {
+      try {
+        console.log('[Location Request]:', 'Initiating geolocation request');
+        const coords = await getUserLocation();
+        const weather = await fetchWeatherByCoords(coords.lat, coords.lon);
+        setWeatherData(weather);
+      } catch (error) {
+        console.error('[Weather Data Error]:', error);
+        setLocationError(error.message);
+      }
+    } else {
+      console.log('[Weather Reset]:', 'Clearing weather data');
+      setWeatherData(null);
+      setLocationError('');
+    }
   };
 
   const handleAddTask = async (e) => {
@@ -50,37 +87,25 @@ const TaskInput = () => {
         isOutsideTask
       };
 
-      if (isOutsideTask) {
-        try {
-          const coords = await getUserLocation();
-          const weatherData = await fetchWeatherByCoords(coords.lat, coords.lon);
-          
-          newTask.weather = {
-            temperature: Math.round(weatherData.main.temp),
-            description: weatherData.weather[0].description,
-            icon: weatherData.weather[0].icon,
-            location: weatherData.name, // Add city name
-            timestamp: new Date().toISOString()
-          };
-        } catch (error) {
-          console.error('Failed to fetch weather data:', error);
-          setLocationError(
-            error.code === 1 
-              ? 'Please enable location access to get weather data'
-              : 'Failed to get weather data for your location'
-          );
-          newTask.weather = {
-            temperature: null,
-            description: 'Weather data unavailable',
-            timestamp: new Date().toISOString()
-          };
-        }
+      if (isOutsideTask && weatherData) {
+        newTask.weather = {
+          temperature: Math.round(weatherData.main.temp),
+          description: weatherData.weather[0].description,
+          icon: weatherData.weather[0].icon,
+          location: weatherData.name,
+          timestamp: new Date().toISOString()
+        };
       }
+
+      console.log('[New Task Created]:', {
+        taskId: newTask.id,
+        hasWeather: !!newTask.weather,
+        weatherData: newTask.weather
+      });
 
       dispatch(addTask(newTask));
       
       try {
-        // Save to localStorage
         const savedTasks = JSON.parse(localStorage.getItem(`tasks_${user.id}`) || '[]');
         localStorage.setItem(`tasks_${user.id}`, JSON.stringify([...savedTasks, newTask]));
         console.log('[localStorage Update]:', 'Task saved successfully');
@@ -91,11 +116,11 @@ const TaskInput = () => {
         });
       }
       
-      // Reset form
       setTask('');
       setIsOutsideTask(false);
       setPriority('low');
       setWeatherData(null);
+      setLocationError('');
       console.log('[Form Reset]:', 'Form state cleared');
     }
   };
@@ -136,23 +161,11 @@ const TaskInput = () => {
           {locationError}
         </div>
       )}
-      {isOutsideTask && weatherData && (
-        <div className="weather-preview">
-          <i className="fas fa-cloud-sun"></i>
-          <span>
-            Current weather: {weatherData.temperature}°C, {weatherData.description} in {weatherData.location}
-          </span>
-        </div>
-      )}
       <button type="submit" className="add-button">
-        Add Task
+        <i className="fas fa-plus"></i> Add Task
       </button>
     </form>
   );
 };
 
 export default TaskInput;
-
-
-
-

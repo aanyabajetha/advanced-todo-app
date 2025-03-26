@@ -38,6 +38,23 @@
   font-size: 1rem;
   cursor: pointer;
   transition: background 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.add-button:hover {
+  background: #27ae60;
+}
+
+.add-button:active {
+  transform: translateY(1px);
+}
+
+.add-button i {
+  font-size: 0.9rem;
 }
 
 /* Tablet and desktop styles */
@@ -118,6 +135,7 @@
   background: #fde8e8;
   border-radius: 6px;
 }
+
 
 
 
