@@ -1,4 +1,4 @@
-import { fetchWeather } from '../../services/api';
+import { fetchWeatherByCity } from '../../services/api';
 
 export const ADD_TASK = 'ADD_TASK';
 export const DELETE_TASK = 'DELETE_TASK';
@@ -27,9 +27,10 @@ export const apiError = (error) => ({
 
 export const fetchWeatherData = (city) => async (dispatch) => {
   try {
-    const weatherData = await fetchWeather(city);
+    const weatherData = await fetchWeatherByCity(city);
     dispatch(setWeather(weatherData));
   } catch (error) {
     dispatch(apiError(error.message));
   }
 };
+
